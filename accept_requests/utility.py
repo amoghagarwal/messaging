@@ -55,7 +55,7 @@ def get_notification_channel():
     """
     global notification_channel
     if notification_channel is None:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(settings.RABBITMQ_IP))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(settings.RABBITMQ_IP, heartbeat_interval=10))
         notification_channel = connection.channel()
     return notification_channel
 
@@ -160,6 +160,7 @@ def get_status_from_redis(uid, db):
             return "Message Already Processed"
     except Exception as ex:
         print "error " + str(ex)
+
 
 def remove_key_from_redis(uid,db):
     """

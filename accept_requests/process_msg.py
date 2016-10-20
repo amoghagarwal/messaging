@@ -7,6 +7,10 @@ from appsphere.settings import RABBITMQ_EXCHANGE as exchange_name
 
 
 def process_msg():
+    """
+    Function to consume messages from the queue, process them and then send them
+    :return:
+    """
     consume_message_from_queue(exchange_name, "process_messaging", "process", cb)
 
 
@@ -21,7 +25,7 @@ def cb(ch, method, properties, body):
     try:
         print(" [x] %r:%r" % (method.routing_key, body))
         payload = json.loads(body)
-        msg, callback_url, uid, msg_time  = processing(payload)
+        msg, callback_url, uid = processing(payload)
         ch.basic_ack(delivery_tag=method.delivery_tag)
         status = send_message(msg)
         # if message is delivered to the client
@@ -30,8 +34,8 @@ def cb(ch, method, properties, body):
         else:
             msg_status = "sent"       #sent from our side and not sure delivered to the cient
         payload = {"message": msg, "status": msg_status,
-                   "callback_url": callback_url, "time": msg_time}
-        if redis_entry_exists(uid, payload, 0) == False:
+                   "callback_url": callback_url}
+        if not redis_entry_exists(uid, payload, 0):
             callback(uid, callback_url, msg, msg_status)
 
 
@@ -47,9 +51,8 @@ def processing(payload):
     print "msg is " + payload["message"]
     print "url is " + payload["callback_url"]
     print "uid is " + payload["uid"]
-    print "msg_time is" + payload["time"]
 
-    return payload["message"], payload["callback_url"], payload["uid"], payload["time"]
+    return payload["message"], payload["callback_url"], payload["uid"],
 
 
 def send_message(msg):
@@ -59,7 +62,7 @@ def send_message(msg):
     :param msg:
     :return:
     """
-    status = send_message_to_client()
+    status = send_message_to_client(msg)
     return status
 
 
@@ -72,7 +75,15 @@ def send_message_to_client(msg):
     status = 200
     return status
 
+
 def redis_entry_exists(uid, payload, db):
+    """
+    Function to check if redis entry exists
+    :param uid:
+    :param payload:
+    :param db:
+    :return:
+    """
     try:
         r = get_redis_connection(db)
         if r.exists(uid):

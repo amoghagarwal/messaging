@@ -1,15 +1,15 @@
-from django.test import TestCase
+
 import redis
 import pika
 
 # Create your tests here.
-from accept_requests.utility import get_redis_connection, get_status_from_redis, get_notification_channel
+
+from django.test import TestCase
+from accept_requests.utility import get_redis_connection, get_status_from_redis, get_notification_channel, create_queue
+from appsphere.settings import RABBITMQ_EXCHANGE as exchange_name
 
 
-class RedisTestCase(TestCase):
-
-    def setUp(self):
-        pass
+class MessagingTestCase(TestCase):
 
     def redis_is_up(self):
         """
@@ -17,22 +17,34 @@ class RedisTestCase(TestCase):
         :return:
         """
         r = get_redis_connection(0)
-        return self.assertTrue(isinstance(r, redis.StrictRedis))
+        self.assertTrue(isinstance(r, redis.StrictRedis))
 
     def get_status(self):
         """
         Check if key doesn't exist in Redis
         :return:
-        """
+    """
         status = get_status_from_redis("FSFSFSD-44255", 0)
-        return self.assertEqual(status, "Message Already Processed")
+        self.assertEqual(status, "Message Already Processed")
 
-    def queue_connection(self):
+    def rabbitmq_connection(self):
         """
         Check Rabbitmq connection
         :return:
         """
         ch = get_notification_channel()
-        return self.assertTrue(isinstance(ch, pika.adapters.blocking_connection.BlockingChannel))
+        self.assertTrue(isinstance(ch, pika.adapters.blocking_connection.BlockingChannel))
+
+    def queue_creation(self):
+        """
+        Check Queue Creation
+        :return:
+        """
+        try:
+            ch = get_notification_channel()
+            create_queue(ch, exchange_name, "process_messaging", "process")
+            self.assertTrue(True)
+        except Exception as ex:
+            self.assertFalse(False)
 
 
