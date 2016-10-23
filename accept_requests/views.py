@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render
 import pika
 import datetime
@@ -27,6 +28,10 @@ def msg_service(request):
 
     time_received = str(datetime.datetime.now())
     uid = str(uuid.uuid4())
+
+    if not callback_url or not msg:
+        response = {"error" : "Please enter valid message and callback"}
+        return HttpResponseBadRequest(json.dumps(response), content_type='application/json')
 
     if enqueue(msg, uid, callback_url):
         msg_status = "queued"
