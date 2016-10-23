@@ -63,3 +63,5 @@ def enqueue(msg, uid, callback_url):
         print "Problem while enqueuing message: " + str(ex)
         return False
 
+def landing_service(request):
+    return HttpResponse("Welcome to messaging app")

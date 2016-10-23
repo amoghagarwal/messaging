@@ -12,5 +12,6 @@ from django.contrib import admin
 from django.conf.urls import *
 
 urlpatterns = patterns('',
+                        url(r'^$', 'accept_requests.views.landing_service' ,name="landing_page"),
                         url(r'^message_api/$', 'accept_requests.views.msg_service', name="msg_service")
 )
