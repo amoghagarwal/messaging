@@ -1,3 +1,7 @@
+import dj_database_url
+db_from_env = dj_database_url.config(conn_max_age=500)
+
+
 """
 Django settings for appsphere project.
 
@@ -76,7 +80,6 @@ WSGI_APPLICATION = 'appsphere.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
 DATABASES = {
    'default': {
         'ENGINE'  : 'django.db.backends.mysql',
@@ -89,6 +92,9 @@ DATABASES = {
     }
 }
 
+DATABASES['default'].update(db_from_env)
+
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -115,3 +121,12 @@ SR_REDIS_PORT = 6379
 RABBITMQ_EXCHANGE = "Messaging"
 
 RABBITMQ_IP = 'localhost'
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
+
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = (
+    os.path.join(PROJECT_ROOT, 'static'),
+)
