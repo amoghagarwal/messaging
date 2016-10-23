@@ -1,5 +1,3 @@
-import dj_database_url
-db_from_env = dj_database_url.config(conn_max_age=500)
 
 
 """
@@ -41,7 +39,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'travel',
     'accept_requests',
     'django_extensions'
 )
@@ -92,7 +89,7 @@ DATABASES = {
     }
 }
 
-DATABASES['default'].update(db_from_env)
+#DATABASES['default'].update(db_from_env)
 
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
