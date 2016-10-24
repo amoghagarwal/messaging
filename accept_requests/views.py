@@ -68,5 +68,13 @@ def enqueue(msg, uid, callback_url):
         print "Problem while enqueuing message: " + str(ex)
         return False
 
+
 def landing_service(request):
     return HttpResponse("Welcome to messaging app")
+
+
+def test_api(request):
+    if request.method == 'POST':
+        msg = str(request.POST.get('msg', None))
+        callback_url = str(request.POST.get('url', None))
+    return HttpResponse()
