@@ -80,6 +80,7 @@ def landing_service(request):
     return HttpResponse("Welcome to messaging app")
 
 
+@csrf_exempt
 def test_api_success(request):
     """
     API for testing callback success
@@ -92,6 +93,7 @@ def test_api_success(request):
     return HttpResponse()
 
 
+@csrf_exempt
 def test_api_failure(request):
     """
     API for testing the callback failure
