@@ -13,5 +13,9 @@ from django.conf.urls import *
 
 urlpatterns = patterns('',
                         url(r'^$', 'accept_requests.views.landing_service' ,name="landing_page"),
-                        url(r'^message_api/$', 'accept_requests.views.msg_service', name="msg_service")
+                        url(r'^message_api/$', 'accept_requests.views.msg_service', name="msg_service"),
+                        url(r'^test_api_success/$', 'accept_requests.views.test_api_success',
+                            name="test_service_success"),
+                        url(r'^test_api_failure/$', 'accept_requests.views.test_api_failure',
+                            name="test_service_failure"),
 )

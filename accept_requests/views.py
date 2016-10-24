@@ -65,16 +65,40 @@ def enqueue(msg, uid, callback_url):
                                   "process_messaging", payload_encoded)
         return True
     except Exception as ex:
-        print "Problem while enqueuing message: " + str(ex)
+        import traceback
+        print "Problem while enqueuing message:"
+        print traceback.format_exc()
         return False
 
 
 def landing_service(request):
+    """
+    API to test the landing page
+    :param request:
+    :return:
+    """
     return HttpResponse("Welcome to messaging app")
 
 
-def test_api(request):
+def test_api_success(request):
+    """
+    API for testing callback success
+    :param request:
+    :return:
+    """
     if request.method == 'POST':
         msg = str(request.POST.get('msg', None))
         callback_url = str(request.POST.get('url', None))
     return HttpResponse()
+
+
+def test_api_failure(request):
+    """
+    API for testing the callback failure
+    :param request:
+    :return:
+    """
+    if request.method == 'POST':
+        msg = str(request.POST.get('msg', None))
+        callback_url = str(request.POST.get('url', None))
+    return HttpResponseBadRequest()
