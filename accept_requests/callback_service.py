@@ -61,7 +61,7 @@ def retry_mechanism(payload, retry_count):
     :param retry_count:
     :return:
     """
-    while retry_count < MAX_NUMBER_OF_RETRIES:
+    while retry_count <= MAX_NUMBER_OF_RETRIES:
         status_code = retry(payload, retry_count)
         if status_code != 200:
             retry_count += 1
