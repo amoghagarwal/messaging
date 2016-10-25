@@ -73,7 +73,7 @@ def send_message_to_client(msg):
     I am assuming that the status of 200 means a successful sent message.
     :return: status
     """
-    time.sleep(2)
+    time.sleep(2) #sending a request and getting response will take time
     status = 200
     return status
 
