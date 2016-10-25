@@ -33,18 +33,25 @@ def msg_service(request):
         response = {"error" : "Please enter valid message and callback"}
         return HttpResponseBadRequest(json.dumps(response), content_type='application/json')
 
+    msg_status = "unqueued"
+    store_status_in_redis(uid, msg_status, 0)
+
     if enqueue(msg, uid, callback_url):
         msg_status = "queued"
         callback(uid, callback_url, msg, msg_status)
     else:
         msg_status = "unqueued"
-        payload = {"message": msg, "status": msg_status,
-                   "callback_url": callback_url, "time": time_received}
-        store_status_in_redis(uid, payload, 1)
-        print "problem while enqueuing. msg stored in redis Db1"
+        store_in_redis(callback_url, msg, msg_status, time_received, uid)
     response = {"uid": uid, "message":msg, "status": "request_accepted",
                 "time": time_received}
     return HttpResponse(json.dumps(response))
+
+
+def store_in_redis(callback_url, msg, msg_status, time_received, uid):
+    payload = {"message": msg, "status": msg_status,
+               "callback_url": callback_url, "time": time_received}
+    store_status_in_redis(uid, payload, 1)
+    print "problem while enqueuing. msg stored in redis Db1"
 
 
 def extract_callback_url(request):

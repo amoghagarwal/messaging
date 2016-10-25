@@ -81,7 +81,6 @@ def unpack(payload, retry_count):
     :param payload:
     :return: msg, payload, uid
     """
-    time.sleep(1)
     print "retry count: " + str(retry_count)
     print "msg is " + payload["message"]
     print "url is " + payload["callback_url"]

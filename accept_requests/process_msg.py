@@ -3,7 +3,8 @@ import json
 import requests
 import redis
 import time
-from utility import consume_message_from_queue, store_status_in_redis, callback, get_redis_connection
+from utility import consume_message_from_queue, store_status_in_redis, callback, get_redis_connection, \
+    redis_entry_exists
 from appsphere.settings import RABBITMQ_EXCHANGE as exchange_name
 
 
@@ -78,20 +79,3 @@ def send_message_to_client(msg):
     return status
 
 
-def redis_entry_exists(uid, payload, db):
-    """
-    Function to check if redis entry exists
-    :param uid:
-    :param payload:
-    :param db:
-    :return:
-    """
-    try:
-        r = get_redis_connection(db)
-        if r.exists(uid):
-            r.set(uid, payload)
-            return True
-        else:
-            return False
-    except Exception as ex:
-        print "error " + str(ex)

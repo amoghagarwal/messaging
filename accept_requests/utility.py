@@ -3,9 +3,11 @@ from appsphere import settings
 import pika
 import requests
 import json
+import time
 from appsphere.settings import RABBITMQ_EXCHANGE as exchange_name
 
 notification_channel = None
+
 
 def get_redis_connection(db):
     """
@@ -96,7 +98,7 @@ def get_callback_status(callback_url, msg, status):
         return -1
 
 
-def store_status_in_redis(uid, payload, db):
+def store_status_in_redis(uid, status, db):
     """
     :param uid: Unique ID of the message
     :param payload: value to be stored in redis
@@ -105,8 +107,7 @@ def store_status_in_redis(uid, payload, db):
     """
     try:
         r = get_redis_connection(db)
-        payload_encoded = json.dumps(payload)
-        r.set(uid, payload_encoded)
+        r.set(uid, status)
     except Exception as ex:
         print "Unable to store status in redis: " + str(ex)
 
@@ -122,14 +123,13 @@ def callback(uid, callback_url, msg, msg_status):
     try:
         callback_status = get_callback_status(callback_url, msg, msg_status)
         if callback_status != 200:
-            payload = {"message": msg, "status": msg_status,
-                       "callback_url": callback_url}
-            store_status_in_redis(uid, payload, 0)
+            store_status_in_redis(uid, msg_status, 0)
             call_retry_mechanism(msg, uid, callback_url)
     except Exception as ex:
         print "Unable to Send Callbacks" + str(ex)
         import traceback
         print traceback.format_exc()
+
 
 def call_retry_mechanism(msg, uid, callback_url):
     """
@@ -153,16 +153,14 @@ def get_status_from_redis(uid, db):
     try:
         r = get_redis_connection(db)
         if r.exists(uid):
-            value = r.get(uid)
-            data = json.loads(value)
-            status = data.get("status")
+            status = r.get(uid)
             return status
         else:
             return "Message Already Processed"
     except Exception as ex:
-        print "error " + str(ex)
         import traceback
         print traceback.format_exc()
+
 
 def remove_key_from_redis(uid,db):
     """
@@ -177,3 +175,22 @@ def remove_key_from_redis(uid,db):
         print "unable to remove keys:"
         import traceback
         print traceback.format_exc()
+
+
+def redis_entry_exists(uid, payload, db):
+    """
+    Function to check if redis entry exists
+    :param uid:
+    :param payload:
+    :param db:
+    :return:
+    """
+    try:
+        r = get_redis_connection(db)
+        if r.exists(uid) and r.get(uid)=="queued":
+            r.set(uid, payload)
+            return True
+        else:
+            return False
+    except Exception as ex:
+        print "error " + str(ex)
