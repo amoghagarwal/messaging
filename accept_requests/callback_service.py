@@ -89,6 +89,10 @@ def unpack(payload, retry_count):
     return payload["message"], payload["callback_url"], payload["uid"]
 
 
+def unpack_without_print(payload, retry_count):
+    return payload["message"], payload["callback_url"], payload["uid"]
+
+
 def store_info_in_db(payload, retry_count):
     """
     Function to store the failed attempts in DB. This is for backup.
@@ -96,7 +100,7 @@ def store_info_in_db(payload, retry_count):
     :return:
     """
     try:
-        msg, url, uid = unpack(payload, retry_count)
+        msg, url, uid = unpack_without_print(payload, retry_count)
         status = get_status_from_redis(uid, 0)
         FailedMessages.objects.create(uid = uid, callback_url = url, message = msg, status = status, retries = retry_count)
         print "Stroing Record in DB"
