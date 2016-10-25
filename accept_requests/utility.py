@@ -128,7 +128,8 @@ def callback(uid, callback_url, msg, msg_status):
             call_retry_mechanism(msg, uid, callback_url)
     except Exception as ex:
         print "Unable to Send Callbacks" + str(ex)
-
+        import traceback
+        print traceback.format_exc()
 
 def call_retry_mechanism(msg, uid, callback_url):
     """
@@ -160,7 +161,8 @@ def get_status_from_redis(uid, db):
             return "Message Already Processed"
     except Exception as ex:
         print "error " + str(ex)
-
+        import traceback
+        print traceback.format_exc()
 
 def remove_key_from_redis(uid,db):
     """
@@ -172,4 +174,6 @@ def remove_key_from_redis(uid,db):
         r = get_redis_connection(db)
         r.delete(uid)
     except Exception as ex:
-        print "unable to remove keys: " + str(ex)
+        print "unable to remove keys:"
+        import traceback
+        print traceback.format_exc()

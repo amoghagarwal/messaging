@@ -53,7 +53,7 @@ def processing(payload):
     print "url is " + payload["callback_url"]
     print "uid is " + payload["uid"]
 
-    return payload["message"], payload["callback_url"], payload["uid"],
+    return payload["message"], payload["callback_url"], payload["uid"]
 
 
 def send_message(msg):
