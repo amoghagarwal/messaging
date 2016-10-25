@@ -61,16 +61,18 @@ def retry_mechanism(payload, retry_count):
     :param retry_count:
     :return:
     """
+    uid = payload["uid"]
     while retry_count <= MAX_NUMBER_OF_RETRIES:
         status_code = retry(payload, retry_count)
         if status_code != 200:
             retry_count += 1
             time.sleep(TIME_INTERVAL_BETWEEN_EACH_RETRY)
         else:
-            remove_key_from_redis()
+            remove_key_from_redis(uid, 0)
             break
     if retry_count > MAX_NUMBER_OF_RETRIES:
         store_info_in_db(payload, retry_count)
+        remove_key_from_redis(uid, 0)
 
 
 def unpack(payload, retry_count):

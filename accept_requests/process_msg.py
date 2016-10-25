@@ -2,6 +2,7 @@ import pika
 import json
 import requests
 import redis
+import time
 from utility import consume_message_from_queue, store_status_in_redis, callback, get_redis_connection
 from appsphere.settings import RABBITMQ_EXCHANGE as exchange_name
 
@@ -72,6 +73,7 @@ def send_message_to_client(msg):
     I am assuming that the status of 200 means a successful sent message.
     :return: status
     """
+    time.sleep(2)
     status = 200
     return status
 
