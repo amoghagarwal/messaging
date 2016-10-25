@@ -49,7 +49,8 @@ def retry(payload, retry_count):
             r = requests.post(callback_url, data=body)
             return r.status_code
     except Exception as ex:
-        print "Problem with retries: " + str(ex)
+        import traceback
+        print traceback.format_exc()
         return -1
 
 
@@ -93,7 +94,7 @@ def store_info_in_db(payload, retry_count):
     :return:
     """
     try:
-        msg, url, uid = unpack(payload)
+        msg, url, uid = unpack(payload, retry_count)
         status = get_status_from_redis(uid, 0)
         FailedMessages.objects.create(uid = uid, callback_url = url, message = msg, status = status, retries = retry_count)
     except Exception as ex:

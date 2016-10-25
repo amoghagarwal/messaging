@@ -55,7 +55,7 @@ def get_notification_channel():
     """
     global notification_channel
     if notification_channel is None:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(settings.RABBITMQ_IP, heartbeat_interval=10))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(settings.RABBITMQ_IP))
         notification_channel = connection.channel()
     return notification_channel
 
