@@ -73,7 +73,7 @@ def retry_mechanism(payload, retry_count):
     if retry_count > MAX_NUMBER_OF_RETRIES:
         store_info_in_db(payload, retry_count)
         remove_key_from_redis(uid, 0)
-
+        print "Finished retrying callback for the message"
 
 def unpack(payload, retry_count):
     """
@@ -96,13 +96,14 @@ def unpack_without_print(payload, retry_count):
 def store_info_in_db(payload, retry_count):
     """
     Function to store the failed attempts in DB. This is for backup.
-    :param payload:
+    :param payload: The data to be stored in table
+    :param retry_count: The number of retries to be stored in table
     :return:
     """
     try:
         msg, url, uid = unpack_without_print(payload, retry_count)
         status = get_status_from_redis(uid, 0)
-        FailedMessages.objects.create(uid = uid, callback_url = url, message = msg, status = status, retries = retry_count)
-        print "Stroing Record in DB"
+        FailedMessages.objects.create(uid=uid, callback_url=url, message=msg, status=status, retries=retry_count)
+        print "Storing Record in DB"
     except Exception as ex:
         print "Error while saving info in DB: " + str(ex)

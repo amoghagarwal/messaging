@@ -171,6 +171,7 @@ def remove_key_from_redis(uid,db):
     try:
         r = get_redis_connection(db)
         r.delete(uid)
+        print "Message entry removed from redis"
     except Exception as ex:
         print "unable to remove keys:"
         import traceback
