@@ -1,18 +1,16 @@
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
-from django.shortcuts import render
-import pika
 import datetime
 import uuid
-import requests
 import json
-import redis
 from django.views.decorators.csrf import csrf_exempt
-
+import logging
 from accept_requests.utility import get_redis_connection, \
     publish_messages_to_queue, get_callback_status, store_status_in_redis, callback
 from appsphere.settings import RABBITMQ_EXCHANGE as exchange_name
 
+# Get an instance of a logger
+log = logging.getLogger(__name__)
 
 @csrf_exempt
 def msg_service(request):
@@ -25,11 +23,11 @@ def msg_service(request):
     if request.method == 'POST':
         msg = str(request.POST.get('msg', None))
         callback_url = str(request.POST.get('url', None))
-
     time_received = str(datetime.datetime.now())
     uid = str(uuid.uuid4())
 
     if not callback_url or not msg:
+        log.error("%s %s error : Please enter valid message and callback" % (callback_url,msg))
         response = {"error" : "Please enter valid message and callback"}
         return HttpResponseBadRequest(json.dumps(response), content_type='application/json')
 
@@ -51,12 +49,7 @@ def store_in_redis(callback_url, msg, msg_status, time_received, uid):
     payload = {"message": msg, "status": msg_status,
                "callback_url": callback_url, "time": time_received}
     store_status_in_redis(uid, payload, 1)
-    print "problem while enqueuing. msg stored in redis Db1"
-
-
-def extract_callback_url(request):
-    pass
-
+    log.error("problem while enqueuing. msg stored in redis Db1")
 
 def enqueue(msg, uid, callback_url):
     """
@@ -73,8 +66,8 @@ def enqueue(msg, uid, callback_url):
         return True
     except Exception as ex:
         import traceback
-        print "Problem while enqueuing message:"
-        print traceback.format_exc()
+        log.info("Problem while enqueuing message:")
+        log.info(traceback.format_exc())
         return False
 
 

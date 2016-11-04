@@ -1,12 +1,12 @@
-import pika
 import json
 import requests
-import redis
+import logging
 import time
 from utility import consume_message_from_queue, store_status_in_redis, callback, get_redis_connection, \
     redis_entry_exists
 from appsphere.settings import RABBITMQ_EXCHANGE as exchange_name
 
+log = logging.getLogger(__name__)
 
 def process_msg():
     """
@@ -25,7 +25,7 @@ def cb(ch, method, properties, body):
     :return:
     """
     try:
-        print(" [x] %r:%r" % (method.routing_key, body))
+        log.info(" [x] %r:%r" % (method.routing_key, body))
         payload = json.loads(body)
         msg, callback_url, uid = processing(payload)
         ch.basic_ack(delivery_tag=method.delivery_tag)
@@ -42,7 +42,7 @@ def cb(ch, method, properties, body):
 
 
     except Exception as ex:
-        print "Error received: " + str(ex)
+        log.error("Error received: " + str(ex))
 
 
 def processing(payload):

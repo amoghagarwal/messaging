@@ -1,13 +1,14 @@
 import json
 import pika
 import requests
-import redis
+import logging
 import time
 
 from accept_requests.models import FailedMessages
 from accept_requests.utility import get_redis_connection, get_status_from_redis, remove_key_from_redis, \
     consume_message_from_queue
 from constants import MAX_NUMBER_OF_RETRIES, TIME_INTERVAL_BETWEEN_EACH_RETRY
+log = logging.getLogger(__name__)
 
 from appsphere.settings import RABBITMQ_EXCHANGE as exchange_name
 
@@ -28,7 +29,7 @@ class Callbacks:
         :param body: Body of the message
         :return:
         """
-        print(" [x] %r:%r" % (method.routing_key, body))
+        log.info(" [x] %r:%r" % (method.routing_key, body))
         payload = json.loads(body)
         ch.basic_ack(delivery_tag=method.delivery_tag)
         retry_mechanism(payload, self.retries)
@@ -50,7 +51,7 @@ def retry(payload, retry_count):
             return r.status_code
     except Exception as ex:
         import traceback
-        print traceback.format_exc()
+        log.error(traceback.format_exc())
         return -1
 
 
@@ -73,18 +74,19 @@ def retry_mechanism(payload, retry_count):
     if retry_count > MAX_NUMBER_OF_RETRIES:
         store_info_in_db(payload, retry_count)
         remove_key_from_redis(uid, 0)
-        print "Finished retrying callback for the message"
+        log.info("Finished retrying callback for the message")
 
 def unpack(payload, retry_count):
     """
     To unserialize the data
     :param payload:
+
     :return: msg, payload, uid
     """
-    print "retry count: " + str(retry_count)
-    print "msg is " + payload["message"]
-    print "url is " + payload["callback_url"]
-    print "uid is " + payload["uid"]
+    log.info("retry count: " + str(retry_count))
+    log.info("msg is " + payload["message"])
+    log.info("url is " + payload["callback_url"])
+    log.info("uid is " + payload["uid"])
 
     return payload["message"], payload["callback_url"], payload["uid"]
 
@@ -104,6 +106,6 @@ def store_info_in_db(payload, retry_count):
         msg, url, uid = unpack_without_print(payload, retry_count)
         status = get_status_from_redis(uid, 0)
         FailedMessages.objects.create(uid=uid, callback_url=url, message=msg, status=status, retries=retry_count)
-        print "Storing Record in DB"
+        log.info("Storing Record in DB")
     except Exception as ex:
-        print "Error while saving info in DB: " + str(ex)
+        log.error("Error while saving info in DB: " + str(ex))
